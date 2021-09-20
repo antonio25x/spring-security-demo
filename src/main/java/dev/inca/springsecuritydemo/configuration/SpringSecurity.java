@@ -1,13 +1,14 @@
 package dev.inca.springsecuritydemo.configuration;
 
 import org.springframework.context.annotation.Bean;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
+import static org.springframework.http.HttpMethod.GET;
 
 @EnableWebSecurity
 public class SpringSecurity extends WebSecurityConfigurerAdapter {
@@ -20,7 +21,7 @@ public class SpringSecurity extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth
-            .inMemoryAuthentication()
+                .inMemoryAuthentication()
                 .withUser("test")
                 .password("test")
                 .roles("USER");
@@ -46,10 +47,23 @@ public class SpringSecurity extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
+                .authorizeRequests(
+                        auth -> {
+                            auth
+                                    .antMatchers(GET, "/hello/world")
+                                    .permitAll()
+                                    .mvcMatchers(GET, "custom/{name}")
+                                    .hasRole("USER");
+                        }
+                                  )
                 .authorizeRequests()
-                .antMatchers(HttpMethod.GET, "/hello/**")
-                .hasRole("USER")
-                .and().formLogin();
+                .anyRequest()
+                .permitAll()
+
+                .and()
+                .formLogin()
+                .and()
+                .httpBasic();
     }
 
 }

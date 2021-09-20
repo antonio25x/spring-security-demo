@@ -13,14 +13,14 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class HelloWorldControllerTest {
+class HelloWorldControllerTest {
 
     @Autowired
     private WebApplicationContext webApplicationContext;
@@ -28,7 +28,7 @@ public class HelloWorldControllerTest {
     private MockMvc mockMvc;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         this.mockMvc = MockMvcBuilders
                 .webAppContextSetup(webApplicationContext)
                 .apply(SecurityMockMvcConfigurers.springSecurity())
@@ -37,24 +37,59 @@ public class HelloWorldControllerTest {
 
     @Test
     @WithMockUser
-    public void testHelloWorldRestAPI() throws Exception {
-        this.mockMvc.perform(get("/hello/world"))
+    void testHelloWorldRestAPI() throws Exception {
+        this.mockMvc.perform(
+                get("/hello/world")
+                            )
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Hello")));
     }
 
     @Test
     @WithMockUser
-    public void testCustomHelloMessage() throws Exception {
+    void testCustomHelloMessage() throws Exception {
         this.mockMvc
                 .perform(
-                    get("/hello/custom/luis")
-                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        get("/hello/custom/luis")
+                                .contentType(MediaType.APPLICATION_JSON_VALUE)
 
-                )
+                        )
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("\"message\":\"luis\"")));
+    }
+
+
+    @Test
+    @WithMockUser
+    void getWithBody_shouldReturnOk_givenValidJsonBody() throws Exception {
+        this.mockMvc
+                .perform(
+                        get("/hello/with-body")
+                                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                                .accept(MediaType.APPLICATION_JSON_VALUE)
+                                .content("{\"name\": \"luis\", \"lastName\": \"test\"}")
+                        )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name", equalTo("luis")))
+                .andExpect(jsonPath("$.lastName", equalTo("test")));
+    }
+
+
+    @Test
+    @WithMockUser
+    void getWithBody_shouldReturnBadRequest_givenInvalidJsonBody() throws Exception {
+        this.mockMvc
+                .perform(
+                        get("/hello/with-body")
+                                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                                .accept(MediaType.APPLICATION_JSON_VALUE)
+                                .content("{\"name\": \"\", \"lastName\": \"\"}") // NOTE here that we are sending empty name
+                        )
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorDescription", equalTo("lastName must not be empty, name must not be empty")))
+                .andExpect(jsonPath("$..trace").doesNotExist());
     }
 
 }
