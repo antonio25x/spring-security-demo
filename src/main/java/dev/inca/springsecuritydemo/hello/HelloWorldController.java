@@ -1,5 +1,8 @@
 package dev.inca.springsecuritydemo.hello;
 
+import dev.inca.springsecuritydemo.hello.model.CustomHelloResponse;
+import dev.inca.springsecuritydemo.hello.model.HelloRequestBody;
+import dev.inca.springsecuritydemo.hello.model.HelloResponseBody;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

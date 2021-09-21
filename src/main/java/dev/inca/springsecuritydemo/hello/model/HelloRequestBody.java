@@ -1,4 +1,4 @@
-package dev.inca.springsecuritydemo.hello;
+package dev.inca.springsecuritydemo.hello.model;
 
 import lombok.Data;
 
