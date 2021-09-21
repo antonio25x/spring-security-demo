@@ -43,6 +43,9 @@ jobs:
         default_author: github_actions
         message: 'Commit badge'
         add: '*.svg'
+      env:
+        REPO_KEY: ${{secrets.PUSH_TOKEN}}
+        USERNAME: github-actions[bot]
 
     - name: Upload to Artifactory
       run: mkdir staging && cp target/*.jar staging
