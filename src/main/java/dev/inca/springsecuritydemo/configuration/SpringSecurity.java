@@ -48,13 +48,13 @@ public class SpringSecurity extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests(
-                        auth -> {
-                            auth
-                                    .antMatchers(GET, "/hello/world")
-                                    .permitAll()
-                                    .mvcMatchers(GET, "custom/{name}")
-                                    .hasRole("USER");
-                        }
+                        auth ->
+                                auth
+                                        .antMatchers(GET, "/hello/world")
+                                        .permitAll()
+                                        .mvcMatchers(GET, "custom/{name}")
+                                        .hasRole("USER")
+
                                   )
                 .authorizeRequests()
                 .anyRequest()
